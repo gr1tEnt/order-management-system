@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface ICustomerRepository {
-    CustomerDto registerCustomer(Customer customer);
+    boolean registerCustomer(Customer customer);
     Optional<Customer> findCustomerById(UUID customerId);
     Optional<Customer> findCustomerByEmailInternal(String email);
     Optional<CustomerDto> findCustomerByEmailDto(String email);
