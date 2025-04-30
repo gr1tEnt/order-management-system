@@ -6,6 +6,7 @@ import lombok.*;
 @Getter
 @Setter
 @ToString
+@AllArgsConstructor
 public class CustomerDto {
     private String first_name;
     private String last_mane;

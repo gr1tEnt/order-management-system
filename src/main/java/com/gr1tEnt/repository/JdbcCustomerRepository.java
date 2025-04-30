@@ -46,7 +46,6 @@ public class JdbcCustomerRepository implements ICustomerRepository {
         try (PreparedStatement stm = conn.prepareStatement(sql)) {
 
             stm.setString(1, String.valueOf(customerId));
-
             ResultSet rs = stm.executeQuery();
 
             if (rs.next()) {
@@ -68,27 +67,17 @@ public class JdbcCustomerRepository implements ICustomerRepository {
     }
 
     @Override
-    public Optional<Customer> findCustomerByEmailInternal(String email) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<CustomerDto> findCustomerByEmailDto(String email) {
-        return Optional.empty();
-    }
-
-    @Override
-    public CustomerDto updateCustomer(UUID customerId, CustomerDto customerDto) {
+    public Customer updateCustomer(UUID customerId, CustomerDto customerDto) {
         return null;
     }
 
     @Override
-    public List<CustomerDto> findAllCustomers() {
+    public List<Customer> findAllCustomers() {
         return List.of();
     }
 
     @Override
-    public List<CustomerDto> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent) {
+    public List<Customer> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent) {
         return List.of();
     }
 }

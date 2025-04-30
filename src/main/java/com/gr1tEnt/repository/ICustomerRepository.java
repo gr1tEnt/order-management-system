@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+// service classes will convert Customer into required DTO
 public interface ICustomerRepository {
     boolean registerCustomer(Customer customer);
     Optional<Customer> findCustomerById(UUID customerId);
-    Optional<Customer> findCustomerByEmailInternal(String email);
-    Optional<CustomerDto> findCustomerByEmailDto(String email);
-    CustomerDto updateCustomer(UUID customerId, CustomerDto customerDto);
-    List<CustomerDto> findAllCustomers();
-    List<CustomerDto> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent);
+    Customer updateCustomer(UUID customerId, CustomerDto customerDto);
+    List<Customer> findAllCustomers();
+    List<Customer> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent);
 }
