@@ -15,4 +15,5 @@ public interface ICustomerRepository {
     Customer updateCustomer(UUID customerId, CustomerDto customerDto);
     List<Customer> findAllCustomers();
     List<Customer> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent);
+    boolean deleteCustomerById(UUID customerId);
 }

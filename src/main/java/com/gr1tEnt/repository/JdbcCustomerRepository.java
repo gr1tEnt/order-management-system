@@ -80,4 +80,18 @@ public class JdbcCustomerRepository implements ICustomerRepository {
     public List<Customer> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent) {
         return List.of();
     }
+
+    @Override
+    public boolean deleteCustomerById(UUID customerId) {
+        String sql = "DELETE " +
+                "FROM customers " +
+                "WHERE customer_id = ?";
+        try (PreparedStatement stm = conn.prepareStatement(sql)) {
+            stm.setString(1, String.valueOf(customerId));
+
+            return stm.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
