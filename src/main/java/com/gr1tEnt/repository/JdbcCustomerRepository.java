@@ -8,11 +8,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public class JdbcCustomerRepository implements ICustomerRepository {
+    private static final List<Customer> customers = new ArrayList<>();
     private final Connection conn;
 
     public JdbcCustomerRepository(Connection conn) {
@@ -73,7 +75,26 @@ public class JdbcCustomerRepository implements ICustomerRepository {
 
     @Override
     public List<Customer> findAllCustomers() {
-        return List.of();
+        String sql = "SELECT customer_id, first_name, last_name, email, password_hash, address " +
+                "FROM customers";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Customer customer = new Customer(
+                        UUID.fromString(rs.getString("customer_id")),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("email"),
+                        rs.getString("password_hash"),
+                        rs.getString("address")
+                );
+                customers.add(customer);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return customers;
     }
 
     @Override
