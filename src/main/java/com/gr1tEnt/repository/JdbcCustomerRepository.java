@@ -6,6 +6,7 @@ import com.gr1tEnt.models.CustomerDto;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -20,7 +21,8 @@ public class JdbcCustomerRepository implements ICustomerRepository {
 
     @Override
     public boolean registerCustomer(Customer customer) {
-        String sql = "INSERT INTO customers (customer_id, first_name, last_name, email, password_hash, address) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO customers (customer_id, first_name, last_name, email, password_hash, address) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stm = conn.prepareStatement(sql)) {
 
             stm.setString(1, customer.getCustomer_id().toString());
@@ -38,7 +40,31 @@ public class JdbcCustomerRepository implements ICustomerRepository {
 
     @Override
     public Optional<Customer> findCustomerById(UUID customerId) {
-        return Optional.empty();
+        String sql = "SELECT customer_id, first_name, last_name, email, password_hash, address " +
+                "FROM customers " +
+                "WHERE customer_id = ?";
+        try (PreparedStatement stm = conn.prepareStatement(sql)) {
+
+            stm.setString(1, String.valueOf(customerId));
+
+            ResultSet rs = stm.executeQuery();
+
+            if (rs.next()) {
+                Customer customer = new Customer(
+                        UUID.fromString(rs.getString("customer_id")),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("email"),
+                        rs.getString("password_hash"),
+                        rs.getString("address")
+                );
+                return Optional.of(customer);
+            } else {
+                return Optional.empty();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
