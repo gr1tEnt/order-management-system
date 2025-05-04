@@ -82,7 +82,16 @@ public class JdbcProductRepository implements IProductsRepository {
 
     @Override
     public boolean deleteProductById(UUID productId) {
-        return false;
+        String sql = "DELETE " +
+                "FROM products " +
+                "WHERE product_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, String.valueOf(productId));
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
