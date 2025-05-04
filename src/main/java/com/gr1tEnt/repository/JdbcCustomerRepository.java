@@ -7,12 +7,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class JdbcCustomerRepository implements ICustomerRepository {
+    private static final Map<UUID, BigDecimal> customers_map = new HashMap<>();
     private static final List<Customer> customers = new ArrayList<>();
     private final Connection conn;
 
@@ -106,8 +104,28 @@ public class JdbcCustomerRepository implements ICustomerRepository {
     }
 
     @Override
-    public List<Customer> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent) {
-        return List.of();
+    public Map<UUID, BigDecimal> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent) {
+        String sql = "SELECT c.customer_id, " +
+                "SUM(o.total_amount) AS total_customer_spending " +
+                "FROM customers c " +
+                "INNER JOIN orders o ON c.customer_id = o.customer_id " +
+                "GROUP BY c.customer_id " +
+                "HAVING SUM(o.total_amount) > ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setBigDecimal(1, minTotalSpent);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                customers_map.put(UUID.fromString(rs.getString("customer_id")),
+                        rs.getBigDecimal("total_customer_spending"));
+            }
+
+            return customers_map;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

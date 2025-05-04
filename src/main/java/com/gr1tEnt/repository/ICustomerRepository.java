@@ -4,6 +4,7 @@ import com.gr1tEnt.models.Customer;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -13,6 +14,6 @@ public interface ICustomerRepository {
     Optional<Customer> findCustomerById(UUID customerId);
     boolean updateCustomerPassword(UUID customerId, String email);
     List<Customer> findAllCustomers();
-    List<Customer> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent);
+    Map<UUID, BigDecimal> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent);
     boolean deleteCustomerById(UUID customerId);
 }
