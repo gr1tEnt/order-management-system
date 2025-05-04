@@ -10,8 +10,6 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class JdbcCustomerRepository implements ICustomerRepository {
-    private static final Map<UUID, BigDecimal> customers_map = new HashMap<>();
-    private static final List<Customer> customers = new ArrayList<>();
     private final Connection conn;
 
     public JdbcCustomerRepository(Connection conn) {
@@ -66,14 +64,15 @@ public class JdbcCustomerRepository implements ICustomerRepository {
     }
 
     @Override
-    public boolean updateCustomerPassword(UUID customerId, String email) {
+    public boolean updateCustomerPassword(UUID customerId, String newPassword) {
         String sql = "UPDATE customers " +
                 "SET password_hash = ? " +
-                "WHERE email = ?";
+                "WHERE customer_id = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, String.valueOf(customerId));
-            stmt.setString(2, email);
+
+            stmt.setString(1, newPassword);
+            stmt.setString(2, String.valueOf(customerId));
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -83,6 +82,7 @@ public class JdbcCustomerRepository implements ICustomerRepository {
 
     @Override
     public List<Customer> findAllCustomers() {
+        List<Customer> currentCustomers = new ArrayList<>();
         String sql = "SELECT customer_id, first_name, last_name, email, password_hash, address " +
                 "FROM customers";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -97,16 +97,18 @@ public class JdbcCustomerRepository implements ICustomerRepository {
                         rs.getString("password_hash"),
                         rs.getString("address")
                 );
-                customers.add(customer);
+                currentCustomers.add(customer);
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return customers;
+        return currentCustomers;
     }
 
     @Override
     public Map<UUID, BigDecimal> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent) {
+        Map<UUID, BigDecimal> matchingCustomers = new HashMap<>();
+
         String sql = "SELECT c.customer_id, " +
                 "SUM(o.total_amount) AS total_customer_spending " +
                 "FROM customers c " +
@@ -120,11 +122,11 @@ public class JdbcCustomerRepository implements ICustomerRepository {
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) {
-                customers_map.put(UUID.fromString(rs.getString("customer_id")),
+                matchingCustomers.put(UUID.fromString(rs.getString("customer_id")),
                         rs.getBigDecimal("total_customer_spending"));
             }
 
-            return customers_map;
+            return matchingCustomers;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
