@@ -67,7 +67,9 @@ public class JdbcCustomerRepository implements ICustomerRepository {
 
     @Override
     public boolean updateCustomerPassword(UUID customerId, String email) {
-        String sql = "UPDATE customers SET password_hash = ? WHERE email = ?";
+        String sql = "UPDATE customers " +
+                "SET password_hash = ? " +
+                "WHERE email = ?";
 
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, String.valueOf(customerId));
