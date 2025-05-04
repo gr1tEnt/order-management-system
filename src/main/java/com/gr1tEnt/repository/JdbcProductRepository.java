@@ -7,12 +7,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public class JdbcProductRepository implements IProductsRepository {
     private final Connection conn;
+    private final List<Product> products = new ArrayList<>();
 
     public JdbcProductRepository(Connection conn) {
         this.conn = conn;
@@ -96,6 +98,28 @@ public class JdbcProductRepository implements IProductsRepository {
 
     @Override
     public List<Product> findProductsByCategory(Category category) {
-        return List.of();
+        String sql = "SELECT product_id, product_name, product_description, price, stock_quantity, category " +
+                "FROM products " +
+                "WHERE category = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, String.valueOf(category));
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Product product = new Product(
+                        UUID.fromString(rs.getString("product_id")),
+                        rs.getString("product_name"),
+                        rs.getString("product_description"),
+                        rs.getDouble("price"),
+                        rs.getInt("stock_quantity"),
+                        Category.valueOf(rs.getString("category"))
+                );
+                products.add(product);
+            }
+            return products;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
