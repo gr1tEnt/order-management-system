@@ -22,14 +22,15 @@ public class JdbcProductRepository implements IProductsRepository {
 
     @Override
     public boolean addProduct(Product product) {
-        String sql = "INSERT INTO products (product_name, product_description, price, stock_quantity) " +
-                "VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO products (product_name, product_description, price, stock_quantity, category) " +
+                "VALUES (?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setString(1, product.getProduct_name());
             stmt.setString(2, product.getProduct_description());
             stmt.setDouble(3, product.getPrice());
             stmt.setInt(4, product.getStock_quantity());
+            stmt.setInt(5, product.getCategory().ordinal());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
