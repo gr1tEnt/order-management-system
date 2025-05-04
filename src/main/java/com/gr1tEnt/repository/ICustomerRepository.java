@@ -16,4 +16,7 @@ public interface ICustomerRepository {
     List<Customer> findAllCustomers();
     Map<UUID, BigDecimal> findAllCustomersWithTotalSpendingAbove(BigDecimal minTotalSpent);
     boolean deleteCustomerById(UUID customerId);
+    List<Customer> findCustomersWithoutOrders();
+    List<Customer> findCustomersByAddressLike(String addressPattern);
+    List<Customer> findCustomersByLastNameLike(String lastNamePattern);
 }
