@@ -1,7 +1,6 @@
 package com.gr1tEnt.repository;
 
 import com.gr1tEnt.models.Customer;
-import com.gr1tEnt.models.CustomerDto;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -69,8 +68,17 @@ public class JdbcCustomerRepository implements ICustomerRepository {
     }
 
     @Override
-    public Customer updateCustomer(UUID customerId, CustomerDto customerDto) {
-        return null;
+    public boolean updateCustomerPassword(UUID customerId, String email) {
+        String sql = "UPDATE customers SET password_hash = ? WHERE email = ?";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, String.valueOf(customerId));
+            stmt.setString(2, email);
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
