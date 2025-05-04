@@ -4,6 +4,8 @@ import com.gr1tEnt.models.Category;
 import com.gr1tEnt.models.Product;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -15,10 +17,21 @@ public class JdbcProductRepository implements IProductsRepository {
         this.conn = conn;
     }
 
-
     @Override
     public boolean addProduct(Product product) {
-        return false;
+        String sql = "INSERT INTO products (product_name, product_description, price, stock_quantity) " +
+                "VALUES (?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, product.getProduct_name());
+            stmt.setString(2, product.getProduct_description());
+            stmt.setDouble(3, product.getPrice());
+            stmt.setInt(4, product.getStock_quantity());
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
