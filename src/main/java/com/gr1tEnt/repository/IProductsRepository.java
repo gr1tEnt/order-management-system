@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface IProductsRepository {
     boolean addProduct(Product product);
     Optional<Product> findProductById(UUID productId);
-    int updateStockQuantity(UUID productId, int quantity);
+    boolean updateStockQuantity(UUID productId, int quantity);
     boolean deleteProductById(UUID productId);
     List<Product> findProductsByCategory(Category category);
 }

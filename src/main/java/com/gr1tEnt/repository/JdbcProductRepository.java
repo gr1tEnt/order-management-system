@@ -66,8 +66,18 @@ public class JdbcProductRepository implements IProductsRepository {
     }
 
     @Override
-    public int updateStockQuantity(UUID productId, int quantity) {
-        return 0;
+    public boolean updateStockQuantity(UUID productId, int quantity) {
+        String sql = "UPDATE product " +
+                "SET stock_quantity = ? " +
+                "WHERE product_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, quantity);
+            stmt.setString(2, String.valueOf(productId));
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
