@@ -25,7 +25,7 @@ public class JdbcProductRepository implements IProductsRepository {
 
             stmt.setString(1, product.getProduct_name());
             stmt.setString(2, product.getProduct_description());
-            stmt.setDouble(3, product.getPrice());
+            stmt.setBigDecimal(3, product.getPrice());
             stmt.setInt(4, product.getStock_quantity());
             stmt.setInt(5, product.getCategory().ordinal());
 
@@ -51,7 +51,7 @@ public class JdbcProductRepository implements IProductsRepository {
                         UUID.fromString(rs.getString("product_id")),
                         rs.getString("product_name"),
                         rs.getString("product_description"),
-                        rs.getDouble("price"),
+                        rs.getBigDecimal("price"),
                         rs.getInt("stock_quantity"),
                         Category.valueOf(rs.getString("category"))
                 );
@@ -110,7 +110,7 @@ public class JdbcProductRepository implements IProductsRepository {
                         UUID.fromString(rs.getString("product_id")),
                         rs.getString("product_name"),
                         rs.getString("product_description"),
-                        rs.getDouble("price"),
+                        rs.getBigDecimal("price"),
                         rs.getInt("stock_quantity"),
                         Category.valueOf(rs.getString("category"))
                 );
