@@ -182,7 +182,35 @@ public class JdbcCustomerRepository implements ICustomerRepository {
         String sql = "SELECT customer_id, first_name, last_name, email, password_hash, address " +
                 "FROM customers " +
                 "WHERE address " +
-                "LIKE '%" + addressPattern + "%' ";
+                "LIKE '%" + addressPattern + "%'";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Customer customer = new Customer(
+                        UUID.fromString(rs.getString("customer_id")),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("email"),
+                        rs.getString("password_hash"),
+                        rs.getString("address")
+                );
+                matchingCustomers.add(customer);
+            }
+            return matchingCustomers;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Customer> findCustomersByLastNameLike(String lastNamePattern) {
+        List<Customer> matchingCustomers = new ArrayList<>();
+
+        String sql = "SELECT customer_id, first_name, last_name, email, password_hash, address " +
+                "FROM customers " +
+                "WHERE last_name " +
+                "LIKE '%" + lastNamePattern + "%'";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
             ResultSet rs = stmt.executeQuery();
 
