@@ -181,11 +181,13 @@ public class JdbcCustomerRepository implements ICustomerRepository {
 
         String sql = "SELECT customer_id, first_name, last_name, email, password_hash, address " +
                 "FROM customers " +
-                "WHERE address " +
-                "LIKE '%" + addressPattern + "%'";
+                "WHERE address LIKE ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
+            String pattern = "%" + addressPattern + "%";
 
+            stmt.setString(1, pattern);
+
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Customer customer = new Customer(
                         UUID.fromString(rs.getString("customer_id")),
@@ -209,11 +211,13 @@ public class JdbcCustomerRepository implements ICustomerRepository {
 
         String sql = "SELECT customer_id, first_name, last_name, email, password_hash, address " +
                 "FROM customers " +
-                "WHERE last_name " +
-                "LIKE '%" + lastNamePattern + "%'";
+                "WHERE last_name LIKE ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-            ResultSet rs = stmt.executeQuery();
+            String pattern = "%" + lastNamePattern + "%";
 
+            stmt.setString(1, pattern);
+
+            ResultSet rs = stmt.executeQuery();
             while (rs.next()) {
                 Customer customer = new Customer(
                         UUID.fromString(rs.getString("customer_id")),
