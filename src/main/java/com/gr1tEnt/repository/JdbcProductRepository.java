@@ -176,4 +176,34 @@ public class JdbcProductRepository implements IProductsRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public List<Product> findProductsByNameLike(String namePattern) {
+        List<Product> products = new ArrayList<>();
+
+        String sql = "SELECT product_id, product_name, product_description, price, stock_quantity, category " +
+                "FROM products " +
+                "WHERE product_name LIKE ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            String pattern = "%" + namePattern + "%";
+
+            stmt.setString(1, pattern);
+
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Product product = new Product(
+                        UUID.fromString(rs.getString("product_id")),
+                        rs.getString("product_name"),
+                        rs.getString("product_description"),
+                        rs.getBigDecimal("price"),
+                        rs.getInt("stock_quantity"),
+                        Category.valueOf(rs.getString("category"))
+                );
+                products.add(product);
+            }
+            return products;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
