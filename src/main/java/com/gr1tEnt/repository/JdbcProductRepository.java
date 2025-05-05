@@ -3,6 +3,7 @@ package com.gr1tEnt.repository;
 import com.gr1tEnt.models.Category;
 import com.gr1tEnt.models.Product;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -140,6 +141,37 @@ public class JdbcProductRepository implements IProductsRepository {
             }
 
             return groupedByCategory;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Product> findProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice) {
+        List<Product> products = new ArrayList<>();
+
+        String sql = "SELECT product_id, product_name, product_description, price, stock_quantity, category " +
+                "FROM products " +
+                "WHERE price >= ? AND price =< ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setBigDecimal(1, minPrice);
+            stmt.setBigDecimal(2, maxPrice);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Product product = new Product(
+                        UUID.fromString(rs.getString("product_id")),
+                        rs.getString("product_name"),
+                        rs.getString("product_description"),
+                        rs.getBigDecimal("price"),
+                        rs.getInt("stock_quantity"),
+                        Category.valueOf(rs.getString("category"))
+                );
+                products.add(product);
+            }
+            return products;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
