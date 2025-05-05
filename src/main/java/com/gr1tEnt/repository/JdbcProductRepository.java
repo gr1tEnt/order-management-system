@@ -7,10 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class JdbcProductRepository implements IProductsRepository {
     private final Connection conn;
@@ -119,6 +116,30 @@ public class JdbcProductRepository implements IProductsRepository {
                 currentProducts.add(product);
             }
             return currentProducts;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Map<Category, Long> countProductsByCategory() {
+        Map<Category, Long> groupedByCategory = new HashMap<>();
+
+        String sql = "SELECT COUNT(product_id) AS quantity, category " +
+                "FROM products " +
+                "GROUP BY category " +
+                "ORDER BY COUNT(product_id) DESC";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                groupedByCategory.put(
+                        Category.valueOf(rs.getString("category")),
+                        rs.getLong("quantity")
+                );
+            }
+
+            return groupedByCategory;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
