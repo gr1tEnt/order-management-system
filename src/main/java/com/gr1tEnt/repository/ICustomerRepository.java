@@ -19,4 +19,8 @@ public interface ICustomerRepository {
     List<Customer> findCustomersWithoutOrders();
     List<Customer> findCustomersByAddressLike(String addressPattern);
     List<Customer> findCustomersByLastNameLike(String lastNamePattern);
+    List<Customer> findCustomersWithOrderCountGreaterThan(int minOrderCount);
+    List<Customer> findCustomersWithAverageOrderValueLessThan(BigDecimal maxAverageValue);
+    Map<Customer, BigDecimal> calculateAverageOrderAmountPerCustomer();
+    Map<Customer, Long> countOrdersPerCustomer();
 }
