@@ -120,4 +120,20 @@ public class JdbcOrderRepository implements IOrderRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public boolean updateOrderStatus(UUID orderId, OrderStatus newStatus) {
+        String sql = "UPDATE orders " +
+                "SET status = ? " +
+                "WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, newStatus.name());
+            stmt.setString(2, String.valueOf(orderId));
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
