@@ -91,4 +91,33 @@ public class JdbcOrderRepository implements IOrderRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public List<Order> findOrdersByStatus(OrderStatus status) {
+        List<Order> orders = new ArrayList<>();
+
+        String sql = "SELECT order_id, customer_id, order_date, status, total_amount, shipping_address " +
+                "FROM orders " +
+                "WHERE status = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, String.valueOf(status));
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Order order = new Order(
+                        UUID.fromString(rs.getString("order_id")),
+                        UUID.fromString(rs.getString("customer_id")),
+                        rs.getDate("order_date").toLocalDate(),
+                        OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                        rs.getBigDecimal("total_amount"),
+                        rs.getString("shipping_address")
+                );
+                orders.add(order);
+            }
+            return orders;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
