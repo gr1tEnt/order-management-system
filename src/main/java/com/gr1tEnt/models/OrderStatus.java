@@ -1,6 +1,6 @@
 package com.gr1tEnt.models;
 
-public enum Status {
+public enum OrderStatus {
     PENDING,
     PROCESSING,
     DELIVERED,

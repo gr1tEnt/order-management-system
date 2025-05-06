@@ -13,7 +13,7 @@ public class Order {
     private UUID order_id;
     private UUID customer_id;
     private LocalDate order_date;
-    private Status status;
+    private OrderStatus status;
     private double total_amount;
     private String shipping_address;
 }
