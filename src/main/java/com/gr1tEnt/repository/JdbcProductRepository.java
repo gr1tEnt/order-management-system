@@ -19,15 +19,16 @@ public class JdbcProductRepository implements IProductsRepository {
 
     @Override
     public boolean addProduct(Product product) {
-        String sql = "INSERT INTO products (product_name, product_description, price, stock_quantity, category) " +
-                "VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO products (product_id, product_name, product_description, price, stock_quantity, category) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-            stmt.setString(1, product.getProduct_name());
-            stmt.setString(2, product.getProduct_description());
-            stmt.setBigDecimal(3, product.getPrice());
-            stmt.setInt(4, product.getStock_quantity());
-            stmt.setInt(5, product.getCategory().ordinal());
+            stmt.setString(1, String.valueOf(product.getProduct_id()));
+            stmt.setString(2, product.getProduct_name());
+            stmt.setString(3, product.getProduct_description());
+            stmt.setBigDecimal(4, product.getPrice());
+            stmt.setInt(5, product.getStock_quantity());
+            stmt.setString(6, product.getCategory().name());
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
