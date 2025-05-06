@@ -15,5 +15,5 @@ public class Product {
     private String product_description;
     private BigDecimal price;
     private int stock_quantity;
-    Category category;
+    private ProductCategory category;
 }

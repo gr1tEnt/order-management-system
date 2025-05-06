@@ -1,6 +1,6 @@
 package com.gr1tEnt.models;
 
-public enum Category {
+public enum ProductCategory {
     ELECTRONICS,
     AUTOMOTIVE,
     CLOTHING,

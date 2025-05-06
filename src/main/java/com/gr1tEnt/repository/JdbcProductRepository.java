@@ -1,6 +1,6 @@
 package com.gr1tEnt.repository;
 
-import com.gr1tEnt.models.Category;
+import com.gr1tEnt.models.ProductCategory;
 import com.gr1tEnt.models.Product;
 
 import java.math.BigDecimal;
@@ -53,7 +53,7 @@ public class JdbcProductRepository implements IProductsRepository {
                         rs.getString("product_description"),
                         rs.getBigDecimal("price"),
                         rs.getInt("stock_quantity"),
-                        Category.valueOf(rs.getString("category"))
+                        ProductCategory.valueOf(rs.getString("category"))
                 );
                 return Optional.of(product);
             } else {
@@ -95,7 +95,7 @@ public class JdbcProductRepository implements IProductsRepository {
     }
 
     @Override
-    public List<Product> findProductsByCategory(Category category) {
+    public List<Product> findProductsByCategory(ProductCategory category) {
         List<Product> currentProducts = new ArrayList<>();
         String sql = "SELECT product_id, product_name, product_description, price, stock_quantity, category " +
                 "FROM products " +
@@ -112,7 +112,7 @@ public class JdbcProductRepository implements IProductsRepository {
                         rs.getString("product_description"),
                         rs.getBigDecimal("price"),
                         rs.getInt("stock_quantity"),
-                        Category.valueOf(rs.getString("category"))
+                        ProductCategory.valueOf(rs.getString("category"))
                 );
                 currentProducts.add(product);
             }
@@ -123,8 +123,8 @@ public class JdbcProductRepository implements IProductsRepository {
     }
 
     @Override
-    public Map<Category, Long> countProductsByCategory() {
-        Map<Category, Long> groupedByCategory = new HashMap<>();
+    public Map<ProductCategory, Long> countProductsByCategory() {
+        Map<ProductCategory, Long> groupedByCategory = new HashMap<>();
 
         String sql = "SELECT COUNT(product_id) AS quantity, category " +
                 "FROM products " +
@@ -135,7 +135,7 @@ public class JdbcProductRepository implements IProductsRepository {
 
             while (rs.next()) {
                 groupedByCategory.put(
-                        Category.valueOf(rs.getString("category")),
+                        ProductCategory.valueOf(rs.getString("category")),
                         rs.getLong("quantity")
                 );
             }
@@ -167,7 +167,7 @@ public class JdbcProductRepository implements IProductsRepository {
                         rs.getString("product_description"),
                         rs.getBigDecimal("price"),
                         rs.getInt("stock_quantity"),
-                        Category.valueOf(rs.getString("category"))
+                        ProductCategory.valueOf(rs.getString("category"))
                 );
                 products.add(product);
             }
@@ -197,7 +197,7 @@ public class JdbcProductRepository implements IProductsRepository {
                         rs.getString("product_description"),
                         rs.getBigDecimal("price"),
                         rs.getInt("stock_quantity"),
-                        Category.valueOf(rs.getString("category"))
+                        ProductCategory.valueOf(rs.getString("category"))
                 );
                 products.add(product);
             }
@@ -223,7 +223,7 @@ public class JdbcProductRepository implements IProductsRepository {
                         rs.getString("product_description"),
                         rs.getBigDecimal("price"),
                         rs.getInt("stock_quantity"),
-                        Category.valueOf(rs.getString("category"))
+                        ProductCategory.valueOf(rs.getString("category"))
                 );
                 products.add(product);
             }
