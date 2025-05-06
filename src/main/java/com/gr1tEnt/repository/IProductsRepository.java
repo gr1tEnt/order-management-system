@@ -19,4 +19,5 @@ public interface IProductsRepository {
     List<Product> findProductsByPriceRange(BigDecimal minPrice, BigDecimal maxPrice);
     List<Product> findProductsByNameLike(String namePattern);
     List<Product> findProductsInStock();
+    Map<ProductCategory, Integer> getTotalStockQuantityPerCategory();
 }
