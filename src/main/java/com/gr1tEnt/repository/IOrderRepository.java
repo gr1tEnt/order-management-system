@@ -1,5 +1,6 @@
 package com.gr1tEnt.repository;
 
+import com.gr1tEnt.models.Customer;
 import com.gr1tEnt.models.Order;
 import com.gr1tEnt.models.OrderStatus;
 
@@ -17,4 +18,5 @@ public interface IOrderRepository {
     List<Order> findOrdersWithTotalAmountAbove(BigDecimal minAmount);
     long countTotalOrders();
     List<Order> findRecentOrders(int limit);
+    List<Customer> findCustomersWhoOrderedSpecificProduct(UUID productId);
 }
