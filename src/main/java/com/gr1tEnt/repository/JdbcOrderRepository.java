@@ -3,6 +3,7 @@ package com.gr1tEnt.repository;
 import com.gr1tEnt.models.Order;
 import com.gr1tEnt.models.OrderStatus;
 
+import java.math.BigDecimal;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -132,6 +133,35 @@ public class JdbcOrderRepository implements IOrderRepository {
             stmt.setString(2, String.valueOf(orderId));
 
             return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Order> findOrdersWithTotalAmountAbove(BigDecimal minAmount) {
+        List<Order> orders = new ArrayList<>();
+
+        String sql = "SELECT order_id, customer_id, order_date, status, total_amount, shipping_address " +
+                "FROM orders " +
+                "WHERE total_amount > ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setBigDecimal(1, minAmount);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Order order = new Order(
+                        UUID.fromString(rs.getString("order_id")),
+                        UUID.fromString(rs.getString("customer_id")),
+                        rs.getDate("order_date").toLocalDate(),
+                        OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                        rs.getBigDecimal("total_amount"),
+                        rs.getString("shipping_address")
+                );
+                orders.add(order);
+            }
+            return orders;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
