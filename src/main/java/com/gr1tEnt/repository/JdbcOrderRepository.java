@@ -166,4 +166,22 @@ public class JdbcOrderRepository implements IOrderRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public long countTotalOrders() {
+        String sql = "SELECT COUNT(*) AS quantity " +
+                "FROM orders";
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getLong("quantity");
+            } else {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
