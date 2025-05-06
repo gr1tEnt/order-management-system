@@ -1,11 +1,11 @@
 package com.gr1tEnt.repository;
 
 import com.gr1tEnt.models.Order;
+import com.gr1tEnt.models.OrderStatus;
 
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Optional;
+import java.util.UUID;
 
 public class JdbcOrderRepository implements IOrderRepository {
     private final Connection conn;
@@ -28,6 +28,34 @@ public class JdbcOrderRepository implements IOrderRepository {
             stmt.setString(6, order.getShipping_address());
 
             return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Optional<Order> findOrderById(UUID orderId) {
+        String sql = "SELECT order_id, customer_id, order_date, status, total_amount, shipping_address " +
+                "FROM orders " +
+                "WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, String.valueOf(orderId));
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                Order order = new Order(
+                        UUID.fromString(rs.getString("order_id")),
+                        UUID.fromString(rs.getString("customer_id")),
+                        rs.getDate("order_date").toLocalDate(),
+                        OrderStatus.valueOf(rs.getString("status")),
+                        rs.getBigDecimal("total_amount"),
+                        rs.getString("shipping_address")
+                );
+                return Optional.of(order);
+            } else {
+                return Optional.empty();
+            }
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
