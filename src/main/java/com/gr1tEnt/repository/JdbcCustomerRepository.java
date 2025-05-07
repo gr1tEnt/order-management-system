@@ -322,4 +322,29 @@ public class JdbcCustomerRepository implements ICustomerRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public Map<UUID, Long> countOrdersPerCustomer() {
+        Map<UUID, Long> ordersPerCustomer = new HashMap<>();
+
+        String sql = "SELECT c.customer_id, COUNT(o.order_id) AS ordersQuantity " +
+                "FROM customers c " +
+                // LEFT JOIN - for all customers, INNER JOIN - only with orders
+                "LEFT JOIN orders o ON c.customer_id = o.customer_id " +
+                "GROUP BY c.customer_id";
+
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                ordersPerCustomer.put(
+                        UUID.fromString(rs.getString("customer_id")),
+                        rs.getLong("ordersQuantity")
+                );
+            }
+            return ordersPerCustomer;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
