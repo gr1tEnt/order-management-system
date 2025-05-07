@@ -42,21 +42,23 @@ public class JdbcOrderRepository implements IOrderRepository {
                 "FROM orders " +
                 "WHERE order_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, String.valueOf(orderId));
 
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                Order order = new Order(
-                        UUID.fromString(rs.getString("order_id")),
-                        UUID.fromString(rs.getString("customer_id")),
-                        rs.getDate("order_date").toLocalDate(),
-                        OrderStatus.valueOf(rs.getString("status").toUpperCase()),
-                        rs.getBigDecimal("total_amount"),
-                        rs.getString("shipping_address")
-                );
-                return Optional.of(order);
-            } else {
-                return Optional.empty();
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    return Optional.of(order);
+                } else {
+                    return Optional.empty();
+                }
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -71,19 +73,21 @@ public class JdbcOrderRepository implements IOrderRepository {
                 "FROM orders " +
                 "WHERE customer_id = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, String.valueOf(customerId));
 
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Order order = new Order(
-                        UUID.fromString(rs.getString("order_id")),
-                        UUID.fromString(rs.getString("customer_id")),
-                        rs.getDate("order_date").toLocalDate(),
-                        OrderStatus.valueOf(rs.getString("status").toUpperCase()),
-                        rs.getBigDecimal("total_amount"),
-                        rs.getString("shipping_address")
-                );
-                orders.add(order);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    orders.add(order);
+                }
             }
             return orders;
         } catch (SQLException e) {
@@ -99,19 +103,21 @@ public class JdbcOrderRepository implements IOrderRepository {
                 "FROM orders " +
                 "WHERE status = ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, String.valueOf(status));
 
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Order order = new Order(
-                        UUID.fromString(rs.getString("order_id")),
-                        UUID.fromString(rs.getString("customer_id")),
-                        rs.getDate("order_date").toLocalDate(),
-                        OrderStatus.valueOf(rs.getString("status").toUpperCase()),
-                        rs.getBigDecimal("total_amount"),
-                        rs.getString("shipping_address")
-                );
-                orders.add(order);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    orders.add(order);
+                }
             }
             return orders;
         } catch (SQLException e) {
@@ -143,19 +149,21 @@ public class JdbcOrderRepository implements IOrderRepository {
                 "FROM orders " +
                 "WHERE total_amount > ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setBigDecimal(1, minAmount);
 
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Order order = new Order(
-                        UUID.fromString(rs.getString("order_id")),
-                        UUID.fromString(rs.getString("customer_id")),
-                        rs.getDate("order_date").toLocalDate(),
-                        OrderStatus.valueOf(rs.getString("status").toUpperCase()),
-                        rs.getBigDecimal("total_amount"),
-                        rs.getString("shipping_address")
-                );
-                orders.add(order);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    orders.add(order);
+                }
             }
             return orders;
         } catch (SQLException e) {
@@ -186,27 +194,28 @@ public class JdbcOrderRepository implements IOrderRepository {
 
         String sql = "SELECT order_id, customer_id, order_date, status, total_amount, shipping_address " +
                 "FROM orders " +
-                "ORDER BY order_date DESC" +
+                "ORDER BY order_date DESC " +
                 "LIMIT ?";
         try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, limit);
 
-            ResultSet rs = stmt.executeQuery();
-            while (rs.next()) {
-                Order order = new Order(
-                        UUID.fromString(rs.getString("order_id")),
-                        UUID.fromString(rs.getString("customer_id")),
-                        rs.getDate("order_date").toLocalDate(),
-                        OrderStatus.valueOf(rs.getString("status").toUpperCase()),
-                        rs.getBigDecimal("total_amount"),
-                        rs.getString("shipping_address")
-                );
-                orders.add(order);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    orders.add(order);
+                }
             }
             return orders;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
-
 }
