@@ -298,4 +298,28 @@ public class JdbcCustomerRepository implements ICustomerRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public Map<UUID, BigDecimal> calculateAverageOrderAmountPerCustomer() {
+        Map<UUID, BigDecimal> customersWithAverageOrderAmount = new HashMap<>();
+
+        String sql = "SELECT c.customer_id, AVG(o.total_amount) AS average_order_value " +
+                "FROM customers c " +
+                "INNER JOIN orders o " +
+                "ON c.customer_id = o.customer_id " +
+                "GROUP BY c.customer_id ";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                customersWithAverageOrderAmount.put(
+                        UUID.fromString(rs.getString("customer_id")),
+                        rs.getBigDecimal("average_order_value")
+                );
+            }
+            return customersWithAverageOrderAmount;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
