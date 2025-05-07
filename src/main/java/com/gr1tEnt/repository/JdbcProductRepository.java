@@ -233,4 +233,24 @@ public class JdbcProductRepository implements IProductsRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public Map<ProductCategory, Integer> getTotalStockQuantityPerCategory() {
+        Map<ProductCategory, Integer> quantityPerCategory = new HashMap<>();
+
+        String sql = "SELECT category, SUM(stock_quantity) AS quantity " +
+                "FROM products " +
+                "GROUP BY category";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                quantityPerCategory.put(ProductCategory.valueOf(rs.getString("category")),
+                rs.getInt("quantity"));
+            }
+            return quantityPerCategory;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
