@@ -266,4 +266,36 @@ public class JdbcCustomerRepository implements ICustomerRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public List<Customer> findCustomersWithAverageOrderValueLessThan(BigDecimal maxAverageValue) {
+        List<Customer> customers = new ArrayList<>();
+
+        String sql = "SELECT c.customer_id, c.first_name, c.last_name, c.email, c.password_hash, c.address " +
+                "FROM customers c " +
+                "INNER JOIN orders o " +
+                "ON c.customer_id = o.customer_id " +
+                "GROUP BY c.customer_id, c.first_name, c.last_name, c.email, c.password_hash, c.address " +
+                "HAVING AVG(o.total_amount) < ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setBigDecimal(1, maxAverageValue);
+
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) {
+                Customer customer = new Customer(
+                        UUID.fromString(rs.getString("customer_id")),
+                        rs.getString("first_name"),
+                        rs.getString("last_name"),
+                        rs.getString("email"),
+                        rs.getString("password_hash"),
+                        rs.getString("address")
+                );
+                customers.add(customer);
+            }
+            return customers;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
