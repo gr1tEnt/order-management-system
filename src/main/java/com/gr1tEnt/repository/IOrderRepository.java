@@ -18,5 +18,4 @@ public interface IOrderRepository {
     List<Order> findOrdersWithTotalAmountAbove(BigDecimal minAmount);
     long countTotalOrders();
     List<Order> findRecentOrders(int limit);
-    List<Customer> findCustomersWhoOrderedSpecificProduct(UUID productId);
 }
