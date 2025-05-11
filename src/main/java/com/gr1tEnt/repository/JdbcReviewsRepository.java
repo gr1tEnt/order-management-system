@@ -3,10 +3,7 @@ package com.gr1tEnt.repository;
 import com.gr1tEnt.models.Review;
 
 import java.lang.annotation.Retention;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.Instant;
 import java.util.*;
 
@@ -28,7 +25,7 @@ public class JdbcReviewsRepository implements IReviewsRepository {
             stmt.setString(3, String.valueOf(review.getCustomer_id()));
             stmt.setInt(4, review.getRating());
             stmt.setString(5, review.getComment_text());
-            stmt.setObject(6, Instant.now());
+            stmt.setTimestamp(6, Timestamp.from(review.getReview_date()));
 
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
