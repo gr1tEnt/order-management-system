@@ -127,4 +127,34 @@ public class JdbcReviewsRepository implements IReviewsRepository {
         }
     }
 
+    @Override
+    public List<Review> findReviewsByRating(int rating) {
+        List<Review> reviews = new ArrayList<>();
+
+        String sql = "SELECT review_id, product_id, customer_id, rating, comment_text, review_date " +
+                "FROM reviews " +
+                "WHERE rating = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, rating);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Review review = new Review(
+                            UUID.fromString(rs.getString("review_id")),
+                            UUID.fromString(rs.getString("product_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getInt("rating"),
+                            rs.getString("comment_text"),
+                            rs.getObject("review_date", Instant.class)
+                    );
+                    reviews.add(review);
+                }
+            }
+            return reviews;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
