@@ -218,4 +218,35 @@ public class JdbcOrderRepository implements IOrderRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public List<Order> findOrdersByCustomerEmail(String customerEmail) {
+        List<Order> orders = new ArrayList<>();
+
+        String sql = "SELECT o.order_id, o.customer_id, o.order_date, o.status, o.total_amount, o.shipping_address " +
+                "FROM orders o " +
+                "INNER JOIN customers c ON o.customer_id = c.customer_id " +
+                "WHERE c.email = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, customerEmail);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    orders.add(order);
+                }
+                return orders;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
