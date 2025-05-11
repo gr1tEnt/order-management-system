@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -60,6 +62,36 @@ public class JdbcReviewsRepository implements IReviewsRepository {
                     return Optional.empty();
                 }
             }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Review> findReviewsByProductId(UUID productId) {
+        List<Review> reviews = new ArrayList<>();
+
+        String sql = "SELECT review_id, product_id, customer_id, rating, comment_text, review_date " +
+                "FROM reviews " +
+                "WHERE product_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, String.valueOf(productId));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Review review = new Review(
+                            UUID.fromString(rs.getString("review_id")),
+                            UUID.fromString(rs.getString("product_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getInt("rating"),
+                            rs.getString("comment_text"),
+                            rs.getObject("review_date", Instant.class)
+                    );
+                    reviews.add(review);
+                }
+            }
+            return reviews;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
