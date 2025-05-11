@@ -7,10 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 public class JdbcReviewsRepository implements IReviewsRepository {
     private final Connection conn;
@@ -173,4 +170,24 @@ public class JdbcReviewsRepository implements IReviewsRepository {
         }
     }
 
+    @Override
+    public OptionalDouble getAverageRatingForProduct(UUID productId) {
+        String sql = "SELECT AVG(rating) AS average_rating " +
+                "FROM reviews " +
+                "WHERE product_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, String.valueOf(productId));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return OptionalDouble.of(rs.getDouble("average_rating"));
+                } else {
+                    return OptionalDouble.empty();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
