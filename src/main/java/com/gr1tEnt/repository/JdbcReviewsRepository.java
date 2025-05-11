@@ -190,4 +190,24 @@ public class JdbcReviewsRepository implements IReviewsRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public long countReviewsForProduct(UUID productId) {
+        String sql = "SELECT COUNT(*) AS count_reviews " +
+                "FROM reviews " +
+                "WHERE product_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, String.valueOf(productId));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("count_reviews");
+                }
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
