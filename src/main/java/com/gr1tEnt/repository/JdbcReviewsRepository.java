@@ -2,6 +2,7 @@ package com.gr1tEnt.repository;
 
 import com.gr1tEnt.models.Review;
 
+import java.lang.annotation.Retention;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -226,9 +227,35 @@ public class JdbcReviewsRepository implements IReviewsRepository {
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
                     productIds.add(
-                            UUID.fromString(rs.getString("product_id")));
+                            UUID.fromString(rs.getString("product_id"))
+                    );
                 }
                 return productIds;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<UUID> findCustomerIdsWhoWroteMoreThanNReviews(int minReviewCount) {
+        List<UUID> customers = new ArrayList<>();
+
+        String sql = "SELECT customer_id " +
+                "FROM reviews " +
+                "GROUP BY customer_id " +
+                "HAVING COUNT(review_id) > ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, minReviewCount);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    customers.add(
+                            UUID.fromString(rs.getString("customer_id"))
+                    );
+                }
+                return customers;
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
