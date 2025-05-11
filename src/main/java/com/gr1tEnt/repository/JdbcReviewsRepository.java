@@ -210,4 +210,28 @@ public class JdbcReviewsRepository implements IReviewsRepository {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public List<UUID> findProductIdsWithAverageRatingAbove(double minAverageRating) {
+        List<UUID> productIds = new ArrayList<>();
+
+        String sql = "SELECT product_id " +
+                "FROM reviews " +
+                "GROUP BY product_id " +
+                "HAVING AVG(rating) >= ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setDouble(1, minAverageRating);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    productIds.add(
+                            UUID.fromString(rs.getString("product_id")));
+                }
+                return productIds;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
