@@ -1,5 +1,6 @@
 package com.gr1tEnt.repository;
 
+import com.gr1tEnt.models.ProductCategory;
 import com.gr1tEnt.models.Review;
 
 import java.lang.annotation.Retention;
@@ -272,6 +273,37 @@ public class JdbcReviewsRepository implements IReviewsRepository {
 
             stmt.setString(1, String.valueOf(productId));
             stmt.setInt(2, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Review review = new Review(
+                            UUID.fromString(rs.getString("review_id")),
+                            UUID.fromString(rs.getString("product_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getInt("rating"),
+                            rs.getString("comment_text"),
+                            rs.getObject("review_date", Instant.class)
+                    );
+                    reviews.add(review);
+                }
+                return reviews;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Review> findReviewsForProductsInCategory(ProductCategory category) {
+        List<Review> reviews = new ArrayList<>();
+
+        String sql = "SELECT r.review_id, r.product_id, r.customer_id, r.rating, r.comment_text, r.review_date " +
+                "FROM reviews r " +
+                "INNER JOIN products p ON r.product_id = p.product_id " +
+                "WHERE p.category = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, String.valueOf(category));
 
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {

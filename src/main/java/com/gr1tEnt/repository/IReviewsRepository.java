@@ -1,5 +1,6 @@
 package com.gr1tEnt.repository;
 
+import com.gr1tEnt.models.ProductCategory;
 import com.gr1tEnt.models.Review;
 
 import java.util.List;
@@ -19,4 +20,5 @@ public interface IReviewsRepository {
     List<UUID> findProductIdsWithAverageRatingAbove(double minAverageRating);
     List<UUID> findCustomerIdsWhoWroteMoreThanNReviews(int minReviewCount);
     List<Review> findNRecentReviewsForProduct(UUID productId, int limit);
+    List<Review> findReviewsForProductsInCategory(ProductCategory category);
 }
