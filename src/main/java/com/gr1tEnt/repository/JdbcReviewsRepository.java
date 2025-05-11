@@ -157,4 +157,20 @@ public class JdbcReviewsRepository implements IReviewsRepository {
         }
     }
 
+    @Override
+    public boolean deleteReview(UUID reviewId, UUID customerId) {
+        String sql = "DELETE " +
+                "FROM reviews " +
+                "WHERE review_id = ? AND customer_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, String.valueOf(reviewId));
+            stmt.setString(2, String.valueOf(customerId));
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 }
