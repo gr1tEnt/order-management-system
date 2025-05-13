@@ -1,0 +1,252 @@
+package com.gr1tEnt.repository;
+
+import com.gr1tEnt.models.Order;
+import com.gr1tEnt.models.OrderStatus;
+
+import java.math.BigDecimal;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+public class JdbcOrderRepository implements IOrderRepository {
+    private final Connection conn;
+
+    public JdbcOrderRepository(Connection conn) {
+        this.conn = conn;
+    }
+
+    @Override
+    public boolean createOrder(Order order) {
+        String sql = "INSERT INTO orders (order_id, customer_id, order_date, status, total_amount, shipping_address) " +
+                "VALUES (?, ?, ?, ?, ?, ?)";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, String.valueOf(order.getOrder_id()));
+            stmt.setString(2, String.valueOf(order.getCustomer_id()));
+            stmt.setDate(3, Date.valueOf(order.getOrder_date()));
+            stmt.setString(4, order.getStatus().name());
+            stmt.setBigDecimal(5, order.getTotal_amount());
+            stmt.setString(6, order.getShipping_address());
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public Optional<Order> findOrderById(UUID orderId) {
+        String sql = "SELECT order_id, customer_id, order_date, status, total_amount, shipping_address " +
+                "FROM orders " +
+                "WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, String.valueOf(orderId));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    return Optional.of(order);
+                } else {
+                    return Optional.empty();
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Order> findOrdersByCustomerId(UUID customerId) {
+        List<Order> orders = new ArrayList<>();
+
+        String sql = "SELECT order_id, customer_id, order_date, status, total_amount, shipping_address " +
+                "FROM orders " +
+                "WHERE customer_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, String.valueOf(customerId));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    orders.add(order);
+                }
+            }
+            return orders;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Order> findOrdersByStatus(OrderStatus status) {
+        List<Order> orders = new ArrayList<>();
+
+        String sql = "SELECT order_id, customer_id, order_date, status, total_amount, shipping_address " +
+                "FROM orders " +
+                "WHERE status = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, String.valueOf(status));
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    orders.add(order);
+                }
+            }
+            return orders;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public boolean updateOrderStatus(UUID orderId, OrderStatus newStatus) {
+        String sql = "UPDATE orders " +
+                "SET status = ? " +
+                "WHERE order_id = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, newStatus.name());
+            stmt.setString(2, String.valueOf(orderId));
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Order> findOrdersWithTotalAmountAbove(BigDecimal minAmount) {
+        List<Order> orders = new ArrayList<>();
+
+        String sql = "SELECT order_id, customer_id, order_date, status, total_amount, shipping_address " +
+                "FROM orders " +
+                "WHERE total_amount > ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setBigDecimal(1, minAmount);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    orders.add(order);
+                }
+            }
+            return orders;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public long countTotalOrders() {
+        String sql = "SELECT COUNT(*) AS quantity " +
+                "FROM orders";
+        try (PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                return rs.getLong("quantity");
+            } else {
+                throw new SQLException();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Order> findRecentOrders(int limit) {
+        List<Order> orders = new ArrayList<>();
+
+        String sql = "SELECT order_id, customer_id, order_date, status, total_amount, shipping_address " +
+                "FROM orders " +
+                "ORDER BY order_date DESC " +
+                "LIMIT ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, limit);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    orders.add(order);
+                }
+            }
+            return orders;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Override
+    public List<Order> findOrdersByCustomerEmail(String customerEmail) {
+        List<Order> orders = new ArrayList<>();
+
+        String sql = "SELECT o.order_id, o.customer_id, o.order_date, o.status, o.total_amount, o.shipping_address " +
+                "FROM orders o " +
+                "INNER JOIN customers c ON o.customer_id = c.customer_id " +
+                "WHERE c.email = ?";
+        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, customerEmail);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Order order = new Order(
+                            UUID.fromString(rs.getString("order_id")),
+                            UUID.fromString(rs.getString("customer_id")),
+                            rs.getDate("order_date").toLocalDate(),
+                            OrderStatus.valueOf(rs.getString("status").toUpperCase()),
+                            rs.getBigDecimal("total_amount"),
+                            rs.getString("shipping_address")
+                    );
+                    orders.add(order);
+                }
+                return orders;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
